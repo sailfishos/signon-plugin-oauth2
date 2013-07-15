@@ -5,11 +5,17 @@ Summary: Plugin which provides oauth and oauth2 authentication enablers to signo
 Group: System/Libraries
 License: LGPLv2.1
 URL: http://code.google.com/p/accounts-sso/
-Source: %{name}-%{version}.tar.bz2
+Source0: %{name}-%{version}.tar.bz2
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
+BuildRequires: pkgconfig(Qt5Network)
 BuildRequires: pkgconfig(Qt5Core)
-BuildRequires: pkgconfig(libsignon-qt5)
+BuildRequires: pkgconfig(Qt5XmlPatterns)
+BuildRequires: pkgconfig(Qt5Test)
+# FIXME: change to pkgconfig(signond) when mer core no longer provides broken qt4-using
+# signond.pc
+BuildRequires: signon-qt5-devel
+
 
 %description
 %{summary}.
@@ -19,7 +25,7 @@ BuildRequires: pkgconfig(libsignon-qt5)
 %{_libdir}/signon/liboauth2plugin.so
 
 %prep
-%setup -n %{name}-%{version}/%{name}
+%setup -q -n %{name}-%{version}/signon-plugin-oauth2
 
 %package -n signon-plugin-oauth2-qt5-oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client
