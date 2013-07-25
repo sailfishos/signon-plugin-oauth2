@@ -27,34 +27,48 @@ BuildRequires: signon-qt5-devel
 %prep
 %setup -q -n %{name}-%{version}/signon-plugin-oauth2
 
-%package -n signon-plugin-oauth2-qt5-oauthclient
+
+%package oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client
 Group: System/Tools
 
-%description -n signon-plugin-oauth2-qt5-oauthclient
+%description oauthclient
 %{summary}.
 
-%files -n signon-plugin-oauth2-qt5-oauthclient
+%files oauthclient
 %defattr(-,root,root,-)
 %{_bindir}/oauthclient
-%{_includedir}/signon-plugins/oauth1data.h
-%{_includedir}/signon-plugins/oauth2data.h
-%{_libdir}/pkgconfig/signon-oauth2plugin.pc
 %{_sysconfdir}/signon-ui/webkit-options.d/m.facebook.com.conf
 %{_sysconfdir}/signon-ui/webkit-options.d/www.facebook.com.conf
 
-%package -n signon-plugin-oauth2-qt5-tests
+
+%package devel
 Summary: Tests for the oauth2 signon plugin
 Group: System/Libraries
 
-%description -n signon-plugin-oauth2-qt5-tests
+%description devel
 %{summary}.
 
-%files -n signon-plugin-oauth2-qt5-tests
+%files devel
+%{_includedir}/signon-plugins/oauth1data.h
+%{_includedir}/signon-plugins/oauth2data.h
+%{_libdir}/pkgconfig/signon-oauth2plugin.pc
+
+
+%package tests
+Summary: Tests for the oauth2 signon plugin
+Group: System/Libraries
+
+%description tests
+%{summary}.
+
+%files tests
 %{_bindir}/signon-oauth2plugin-tests
 %{_datadir}/signon-oauth2plugin-tests/tests.xml
 
+
 %build
+sed -i 's,$${INSTALL_PREFIX}/lib64,$${INSTALL_PREFIX}/lib,g' common-project-config.pri
 %qmake5
 make %{?jobs:-j%jobs}
 
