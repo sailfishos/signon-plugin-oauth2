@@ -6,6 +6,7 @@ Group: System/Libraries
 License: LGPLv2.1
 URL: http://code.google.com/p/accounts-sso/
 Source: %{name}-%{version}.tar.bz2
+Patch0: 0001-Manually-time-out-HTTP-requests-after-30-seconds.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(signond)
@@ -22,6 +23,8 @@ BuildRequires: pkgconfig(signon-plugins)
 
 %prep
 %setup -n %{name}-%{version}/%{name}
+
+%patch0 -p1
 
 %package -n signon-plugin-oauth2-oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client

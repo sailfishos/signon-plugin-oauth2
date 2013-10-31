@@ -1,0 +1,119 @@
+From a5d4cd828d4ace373e0b99839410ba6dbf7fc1c9 Mon Sep 17 00:00:00 2001
+From: John Brooks <john.brooks@jollamobile.com>
+Date: Thu, 31 Oct 2013 05:31:10 -0600
+Subject: [PATCH] Manually time out HTTP requests after 30 seconds
+
+In some cases, QNAM appears to not give a finished or error signal at any time.
+To avoid having authentication requests that can get stuck, time out HTTP requests
+manually after 30 seconds.
+---
+ src/base-plugin.cpp |   21 +++++++++++++++++++++
+ src/base-plugin.h   |    1 +
+ 2 files changed, 22 insertions(+)
+
+diff --git a/src/base-plugin.cpp b/src/base-plugin.cpp
+index 9971508..fcb2b63 100644
+--- a/src/base-plugin.cpp
++++ b/src/base-plugin.cpp
+@@ -32,6 +32,7 @@
+ #include <QNetworkProxy>
+ #include <QDateTime>
+ #include <QCryptographicHash>
++#include <QTimer>
+ 
+ using namespace SignOn;
+ using namespace OAuth2PluginNS;
+@@ -46,6 +47,7 @@ public:
+ 
+     QNetworkAccessManager *m_networkAccessManager;
+     QNetworkReply *m_reply;
++    QTimer m_timeout;
+ }; //Private
+ 
+ } //namespace OAuth2PluginNS
+@@ -54,6 +56,8 @@ BasePluginPrivate::BasePluginPrivate():
+     m_networkAccessManager(0),
+     m_reply(0)
+ {
++    m_timeout.setInterval(1000 * 30);
++    m_timeout.setSingleShot(true);
+ }
+ 
+ BasePluginPrivate::~BasePluginPrivate()
+@@ -68,6 +72,7 @@ BasePlugin::BasePlugin(QObject *parent):
+     QObject(parent),
+     d_ptr(new BasePluginPrivate())
+ {
++    QObject::connect(&d_ptr->m_timeout, SIGNAL(timeout()), SLOT(onPostTimeout()));
+ }
+ 
+ BasePlugin::~BasePlugin()
+@@ -116,6 +121,8 @@ void BasePlugin::postRequest(const QNetworkRequest &request,
+             this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
+     connect(d->m_reply, SIGNAL(sslErrors(QList<QSslError>)),
+             this, SLOT(handleSslErrors(QList<QSslError>)));
++
++    d->m_timeout.start();
+ }
+ 
+ void BasePlugin::serverReply(QNetworkReply *reply)
+@@ -136,6 +143,7 @@ void BasePlugin::onPostFinished()
+             return;
+     }
+ 
++    d->m_timeout.stop();
+     if (d->m_reply) {
+         d->m_reply->deleteLater();
+         d->m_reply = 0;
+@@ -144,6 +152,16 @@ void BasePlugin::onPostFinished()
+     serverReply(reply);
+ }
+ 
++void BasePlugin::onPostTimeout()
++{
++    Q_D(BasePlugin);
++
++    if (d->m_reply) {
++        TRACE() << "network request manually timed out";
++        d->m_reply->abort();
++    }
++}
++
+ bool BasePlugin::handleNetworkError(QNetworkReply::NetworkError err)
+ {
+     Q_D(BasePlugin);
+@@ -162,6 +180,7 @@ bool BasePlugin::handleNetworkError(QNetworkReply::NetworkError err)
+     if (err <= QNetworkReply::UnknownNetworkError)
+         type = Error::NoConnection;
+     QString errorString = "";
++    d->m_timeout.stop();
+     if (d->m_reply) {
+         errorString = d->m_reply->errorString();
+         d->m_reply->deleteLater();
+@@ -180,9 +199,11 @@ void BasePlugin::handleSslErrors(QList<QSslError> errorList)
+     foreach (QSslError error, errorList) {
+         errorString += error.errorString() + ";";
+     }
++    d->m_timeout.stop();
+     if (d->m_reply) {
+         d->m_reply->deleteLater();
+         d->m_reply = 0;
+     }
+     emit error(Error(Error::Ssl, errorString));
+ }
++
+diff --git a/src/base-plugin.h b/src/base-plugin.h
+index 5aca307..0bf5730 100644
+--- a/src/base-plugin.h
++++ b/src/base-plugin.h
+@@ -67,6 +67,7 @@ protected:
+ 
+ protected Q_SLOTS:
+     void onPostFinished();
++    void onPostTimeout();
+     virtual bool handleNetworkError(QNetworkReply::NetworkError err);
+     virtual void handleSslErrors(QList<QSslError> errorList);
+ 
+-- 
+1.7.9.5
+
