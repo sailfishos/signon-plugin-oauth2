@@ -7,6 +7,7 @@ License: LGPLv2.1
 URL: http://code.google.com/p/accounts-sso/
 Source0: %{name}-%{version}.tar.bz2
 Patch0: 0001-Manually-time-out-HTTP-requests-after-30-seconds.patch
+Patch1: 0002-OAuth2-Relax-RefreshToken-restriction-on-ProvidedTok.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(Qt5Network)
@@ -29,6 +30,7 @@ BuildRequires: signon-qt5-devel
 %setup -q -n %{name}-%{version}/signon-plugin-oauth2
 
 %patch0 -p1
+%patch1 -p1
 
 %package oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client
