@@ -1,0 +1,43 @@
+From 4cd4eea3889b0ddb7653a4bb3ae845ef73d6bace Mon Sep 17 00:00:00 2001
+From: Chris Adams <chris.adams@jollamobile.com>
+Date: Thu, 5 Feb 2015 20:34:01 +1000
+Subject: [PATCH] Always force client auth via request body
+
+---
+ src/oauth2plugin.cpp | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
+index 77aa862..d2aac26 100644
+--- a/src/oauth2plugin.cpp
++++ b/src/oauth2plugin.cpp
+@@ -603,17 +603,17 @@ void OAuth2Plugin::sendOAuth2PostRequest(QUrl &postData,
+     request.setRawHeader(CONTENT_TYPE, CONTENT_APP_URLENCODED);
+ 
+     if (!d->m_oauth2Data.ClientSecret().isEmpty()) {
+-        if (d->m_oauth2Data.ForceClientAuthViaRequestBody()) {
++//        if (d->m_oauth2Data.ForceClientAuthViaRequestBody()) {
+             postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
+             postData.addQueryItem(CLIENT_SECRET, d->m_oauth2Data.ClientSecret());
+-        } else {
+-            QByteArray authorization =
+-                QUrl::toPercentEncoding(d->m_oauth2Data.ClientId()) + ":" +
+-                QUrl::toPercentEncoding(d->m_oauth2Data.ClientSecret());
+-            QByteArray basicAuthorization =
+-                QByteArray("Basic ") + authorization.toBase64();
+-            request.setRawHeader("Authorization", basicAuthorization);
+-        }
++//        } else {
++//            QByteArray authorization =
++//                QUrl::toPercentEncoding(d->m_oauth2Data.ClientId()) + ":" +
++//                QUrl::toPercentEncoding(d->m_oauth2Data.ClientSecret());
++//            QByteArray basicAuthorization =
++//                QByteArray("Basic ") + authorization.toBase64();
++//            request.setRawHeader("Authorization", basicAuthorization);
++//        }
+     } else {
+         postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
+     }
+-- 
+1.9.1
+
