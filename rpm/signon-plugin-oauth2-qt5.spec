@@ -4,7 +4,7 @@ Release: 2
 Summary: Plugin which provides oauth and oauth2 authentication enablers to signond
 Group: System/Libraries
 License: LGPLv2.1
-URL: http://code.google.com/p/accounts-sso/
+URL: https://gitlab.com/groups/accounts-sso
 Source0: %{name}-%{version}.tar.bz2
 Patch0: 0001-Manually-time-out-HTTP-requests-after-30-seconds.patch
 Patch1: 0002-OAuth2-Relax-RefreshToken-restriction-on-ProvidedTok.patch
