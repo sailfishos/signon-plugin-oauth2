@@ -1,6 +1,6 @@
 Name: signon-plugin-oauth2-qt5
 Version: 0.21
-Release: 2
+Release: 3
 Summary: Plugin which provides oauth and oauth2 authentication enablers to signond
 Group: System/Libraries
 License: LGPLv2.1
