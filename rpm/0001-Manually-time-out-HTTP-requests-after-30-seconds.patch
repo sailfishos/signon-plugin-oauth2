@@ -1,7 +1,7 @@
-From 01a35b2ee6617c82a854d1f78aac1f668722a423 Mon Sep 17 00:00:00 2001
+From cd1d1f4b3433bdc2bcd7638aecea127a750f60b4 Mon Sep 17 00:00:00 2001
 From: John Brooks <john.brooks@jollamobile.com>
 Date: Thu, 31 Oct 2013 05:31:10 -0600
-Subject: [PATCH 1/6] Manually time out HTTP requests after 30 seconds
+Subject: [PATCH 1/7] Manually time out HTTP requests after 30 seconds
 
 In some cases, QNAM appears to not give a finished or error signal at any time.
 To avoid having authentication requests that can get stuck, time out HTTP requests

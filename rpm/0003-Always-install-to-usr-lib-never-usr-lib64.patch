@@ -1,7 +1,7 @@
-From 5c861215dee7ed33b4424765eead8b95b83ae571 Mon Sep 17 00:00:00 2001
+From 6535ae8eab06369f9122061b200c8f9deefff4d8 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 5 Feb 2015 20:32:52 +1000
-Subject: [PATCH 3/6] Always install to /usr/lib never /usr/lib64
+Subject: [PATCH 3/7] Always install to /usr/lib never /usr/lib64
 
 ---
  common-project-config.pri | 8 ++++----

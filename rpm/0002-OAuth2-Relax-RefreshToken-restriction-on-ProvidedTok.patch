@@ -1,7 +1,7 @@
-From 050ff74f89a1733e56cbce360058b984dd1fdd95 Mon Sep 17 00:00:00 2001
+From 2ec573d51d768dcc1888474e44d5e255ce155c71 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 27 Mar 2014 18:58:03 +1000
-Subject: [PATCH 2/6] OAuth2: Relax RefreshToken restriction on ProvidedTokens
+Subject: [PATCH 2/7] OAuth2: Relax RefreshToken restriction on ProvidedTokens
 
 Some OAuth2 services (like Facebook) do not return RefreshToken
 data, only AccessToken and ExpiresIn.  This commit ensures that
