@@ -1,7 +1,7 @@
-From a791c56fd96c3c65a85717c130272082165de243 Mon Sep 17 00:00:00 2001
+From 4e22d43cdc55be8aa583227484da6f35d539f61b Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Wed, 22 Apr 2015 03:56:03 +0000
-Subject: [PATCH] Skip unstable unit tests
+Subject: [PATCH 5/6] Skip unstable unit tests
 
 The unit tests are very unstable in version 0.21 of this plugin.
 The stability of the tests was improved greatly in 0.22, so until
@@ -49,5 +49,5 @@ index 5107a4f..f4a7884 100644
        <environments>
          <scratchbox>true</scratchbox>
 -- 
-1.8.3-rc3
+2.17.1
 

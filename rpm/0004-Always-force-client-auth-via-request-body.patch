@@ -1,17 +1,17 @@
-From 4cd4eea3889b0ddb7653a4bb3ae845ef73d6bace Mon Sep 17 00:00:00 2001
+From c4642e105499ab846080ca5a1c5bdd18d7f9c4d0 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 5 Feb 2015 20:34:01 +1000
-Subject: [PATCH] Always force client auth via request body
+Subject: [PATCH 4/6] Always force client auth via request body
 
 ---
  src/oauth2plugin.cpp | 18 +++++++++---------
  1 file changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
-index 77aa862..d2aac26 100644
+index 290adf0..5775700 100644
 --- a/src/oauth2plugin.cpp
 +++ b/src/oauth2plugin.cpp
-@@ -603,17 +603,17 @@ void OAuth2Plugin::sendOAuth2PostRequest(QUrl &postData,
+@@ -602,17 +602,17 @@ void OAuth2Plugin::sendOAuth2PostRequest(QUrl &postData,
      request.setRawHeader(CONTENT_TYPE, CONTENT_APP_URLENCODED);
  
      if (!d->m_oauth2Data.ClientSecret().isEmpty()) {
@@ -39,5 +39,5 @@ index 77aa862..d2aac26 100644
          postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
      }
 -- 
-1.9.1
+2.17.1
 
