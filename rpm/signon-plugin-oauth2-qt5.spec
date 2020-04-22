@@ -11,7 +11,8 @@ Patch1: 0002-OAuth2-Relax-RefreshToken-restriction-on-ProvidedTok.patch
 Patch2: 0003-Always-install-to-usr-lib-never-usr-lib64.patch
 Patch3: 0004-Always-force-client-auth-via-request-body.patch
 Patch4: 0005-Skip-unstable-unit-tests.patch
-Patch5: 0006-Remove-type-query-argument-for-dropbox.patch
+Patch5: 0006-Fix-dropbox-authentication-by-removing-type-query-ar.patch
+Patch6: 0007-Support-OneDrive-oauth2-flow.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(Qt5Network)
@@ -39,6 +40,7 @@ BuildRequires: signon-qt5-devel
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %package oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client

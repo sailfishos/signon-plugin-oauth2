@@ -1,21 +1,21 @@
-From 183572558eb1ada601a23191d38a65e0083730ce Mon Sep 17 00:00:00 2001
+From 2ec573d51d768dcc1888474e44d5e255ce155c71 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 27 Mar 2014 18:58:03 +1000
-Subject: [PATCH] OAuth2: Relax RefreshToken restriction on ProvidedTokens
+Subject: [PATCH 2/7] OAuth2: Relax RefreshToken restriction on ProvidedTokens
 
 Some OAuth2 services (like Facebook) do not return RefreshToken
 data, only AccessToken and ExpiresIn.  This commit ensures that
 clients can still provide cached token data when no RefreshToken
 is present in the token map.
 ---
- src/oauth2plugin.cpp |    5 ++---
+ src/oauth2plugin.cpp | 5 ++---
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
-index b7940ef..001ef44 100644
+index 77aa862..290adf0 100644
 --- a/src/oauth2plugin.cpp
 +++ b/src/oauth2plugin.cpp
-@@ -273,9 +273,8 @@ void OAuth2Plugin::process(const SignOn::SessionData &inData,
+@@ -282,9 +282,8 @@ void OAuth2Plugin::process(const SignOn::SessionData &inData,
          OAuth2PluginTokenData providedTokens =
                  SignOn::SessionData(tokens.ProvidedTokens())
                  .data<OAuth2PluginTokenData>();
@@ -28,5 +28,5 @@ index b7940ef..001ef44 100644
          } else {
              TRACE() << "Storing provided tokens";
 -- 
-1.7.10.4
+2.17.1
 

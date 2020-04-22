@@ -1,0 +1,32 @@
+From 519e6597eb65c72796804f21641ea3a185f3591e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Filip=20Matijevi=C4=87?= <filip.matijevic.pz@gmail.com>
+Date: Thu, 2 Apr 2020 14:23:30 +1000
+Subject: [PATCH 6/7] Fix dropbox authentication by removing "type" query
+ argument
+
+Fixes https://code.google.com/p/accounts-sso/issues/detail?id=245
+Based on 1175309c672192380b7161b175b5268135209af8
+Changed to be dropbox specific
+---
+ src/oauth2plugin.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
+index 5775700..14445d5 100644
+--- a/src/oauth2plugin.cpp
++++ b/src/oauth2plugin.cpp
+@@ -140,7 +140,10 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
+     if (!d->m_oauth2Data.Display().isEmpty()) {
+         url.addQueryItem(DISPLAY, d->m_oauth2Data.Display());
+     }
+-    url.addQueryItem(QString("type"), d->m_mechanism);
++    if (!((d->m_oauth2Data.Host().contains(QLatin1String("dropbox.com")))
++            || (d->m_oauth2Data.Host().contains(QLatin1String("dropboxapi.com"))))) {
++        url.addQueryItem(QString("type"), d->m_mechanism);
++    }
+     if (!d->m_oauth2Data.Scope().empty()) {
+         QString separator = QLatin1String(" ");
+ 
+-- 
+2.17.1
+
