@@ -2,8 +2,7 @@ Name: signon-plugin-oauth2
 Version: 0.15
 Release: 1
 Summary: Plugin which provides oauth and oauth2 authentication enablers to signond
-Group: System/Libraries
-License: LGPLv2.1
+License: LGPLv2
 URL: http://code.google.com/p/accounts-sso/
 Source: %{name}-%{version}.tar.bz2
 Patch0: 0001-Manually-time-out-HTTP-requests-after-30-seconds.patch
@@ -21,6 +20,7 @@ BuildRequires: pkgconfig(signon-plugins)
 %files
 %defattr(-,root,root,-)
 %{_libdir}/signon/liboauth2plugin.so
+%license COPYING
 
 %prep
 %setup -n %{name}-%{version}/%{name}
@@ -30,7 +30,6 @@ BuildRequires: pkgconfig(signon-plugins)
 
 %package -n signon-plugin-oauth2-oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client
-Group: System/Tools
 
 %description -n signon-plugin-oauth2-oauthclient
 %{summary}.
@@ -46,7 +45,6 @@ Group: System/Tools
 
 %package -n signon-plugin-oauth2-tests
 Summary: Tests for the oauth2 signon plugin
-Group: System/Libraries
 
 %description -n signon-plugin-oauth2-tests
 %{summary}.
