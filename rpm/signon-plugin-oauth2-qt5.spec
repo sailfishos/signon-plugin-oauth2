@@ -2,8 +2,7 @@ Name: signon-plugin-oauth2-qt5
 Version: 0.21.7
 Release: 0
 Summary: Plugin which provides oauth and oauth2 authentication enablers to signond
-Group: System/Libraries
-License: LGPLv2.1
+License: LGPLv2
 URL: http://code.google.com/p/accounts-sso/
 Source0: %{name}-%{version}.tar.bz2
 Patch0: 0001-Manually-time-out-HTTP-requests-after-30-seconds.patch
@@ -30,6 +29,7 @@ BuildRequires: signon-qt5-devel
 %files
 %defattr(-,root,root,-)
 %{_libdir}/signon/liboauth2plugin.so
+%license COPYING
 
 %prep
 %setup -q -n %{name}-%{version}/signon-plugin-oauth2
@@ -44,7 +44,6 @@ BuildRequires: signon-qt5-devel
 
 %package oauthclient
 Summary: OAuth2 SignOn Plugin OAuth Client
-Group: System/Tools
 
 %description oauthclient
 %{summary}.
@@ -58,7 +57,6 @@ Group: System/Tools
 
 %package devel
 Summary: Tests for the oauth2 signon plugin
-Group: System/Libraries
 
 %description devel
 %{summary}.
@@ -71,7 +69,6 @@ Group: System/Libraries
 
 %package tests
 Summary: Tests for the oauth2 signon plugin
-Group: System/Libraries
 
 %description tests
 %{summary}.
