@@ -1,7 +1,7 @@
-From 519e6597eb65c72796804f21641ea3a185f3591e Mon Sep 17 00:00:00 2001
+From 0ca5adca0412bb01af16865122f68b4354d5d2cc Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Filip=20Matijevi=C4=87?= <filip.matijevic.pz@gmail.com>
 Date: Thu, 2 Apr 2020 14:23:30 +1000
-Subject: [PATCH 6/7] Fix dropbox authentication by removing "type" query
+Subject: [PATCH 6/8] Fix dropbox authentication by removing "type" query
  argument
 
 Fixes https://code.google.com/p/accounts-sso/issues/detail?id=245

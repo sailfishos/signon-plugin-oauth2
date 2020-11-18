@@ -1,0 +1,218 @@
+From b544adb56d59940ba0203678c70c220a8a27b5b2 Mon Sep 17 00:00:00 2001
+From: Chris Adams <chris.adams@jolla.com>
+Date: Tue, 17 Nov 2020 13:51:57 +1000
+Subject: [PATCH 8/8] Transform the default external redirect uri placeholder
+ into url
+
+This allows the account services to declare that they are using the
+default external redirect uri, rather than hardcoding the url itself.
+---
+ src/oauth1plugin.cpp | 33 +++++++++++++++++++++++++++++----
+ src/oauth2plugin.cpp | 33 +++++++++++++++++++++++++++------
+ src/src.pro          |  3 ++-
+ tests/tests.pro      |  1 +
+ 4 files changed, 59 insertions(+), 11 deletions(-)
+
+diff --git a/src/oauth1plugin.cpp b/src/oauth1plugin.cpp
+index 026214d..0828eca 100644
+--- a/src/oauth1plugin.cpp
++++ b/src/oauth1plugin.cpp
+@@ -32,6 +32,9 @@
+ #include <QDateTime>
+ #include <QCryptographicHash>
+ 
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
++
+ using namespace SignOn;
+ using namespace OAuth2PluginNS;
+ 
+@@ -79,6 +82,8 @@ const QString OAUTH_PROBLEM = QString("oauth_problem");
+ const QString OAUTH_USER_REFUSED = QString("user_refused");
+ const QString OAUTH_PERMISSION_DENIED = QString("permission_denied");
+ 
++const QString DEFAULT_EXTERNAL_REDIRECT_URI = QString("org.sailfishos.accounts.default_external_redirect");
++
+ const QByteArray CONTENT_TYPE = QByteArray("Content-Type");
+ const QByteArray CONTENT_APP_URLENCODED = QByteArray("application/x-www-form-urlencoded");
+ const QByteArray CONTENT_TEXT_PLAIN = QByteArray("text/plain");
+@@ -113,6 +118,7 @@ public:
+     QString m_key;
+     QString m_username;
+     QString m_password;
++    QString m_defaultExternalRedirectUrl;
+ }; //Private
+ 
+ } //namespace OAuth2PluginNS
+@@ -122,6 +128,15 @@ OAuth1Plugin::OAuth1Plugin(QObject *parent):
+     d_ptr(new OAuth1PluginPrivate())
+ {
+     TRACE();
++
++    QDBusInterface iface(QStringLiteral("net.connman"),
++                         QStringLiteral("/"),
++                         QStringLiteral("net.connman.Manager"),
++                         QDBusConnection::systemBus());
++    QDBusReply<QVariantMap> props = iface.call(QStringLiteral("GetProperties"));
++    d_ptr->m_defaultExternalRedirectUrl = props.value().value(QStringLiteral("Ipv4StatusUrl")).toString();
++    // Jolla app on Twitter uses http redirect url
++    d_ptr->m_defaultExternalRedirectUrl.replace(QStringLiteral("https"), QStringLiteral("http"));
+ }
+ 
+ OAuth1Plugin::~OAuth1Plugin()
+@@ -153,8 +168,12 @@ void OAuth1Plugin::sendOAuth1AuthRequest()
+     TRACE() << "URL = " << url.toString();
+     SignOn::UiSessionData uiSession;
+     uiSession.setOpenUrl(url.toString());
+-    if (d->m_oauth1Data.Callback() != "oob")
+-        uiSession.setFinalUrl(d->m_oauth1Data.Callback());
++    if (d->m_oauth1Data.Callback() != "oob") {
++        uiSession.setFinalUrl(d->m_oauth1Data.Callback().compare(
++                DEFAULT_EXTERNAL_REDIRECT_URI, Qt::CaseInsensitive) == 0
++                        ? d->m_defaultExternalRedirectUrl
++                        : d->m_oauth1Data.Callback());
++    }
+ 
+     /* add username and password, for fields initialization (the
+      * decision on whether to actually use them is up to the signon UI */
+@@ -365,7 +384,10 @@ QByteArray OAuth1Plugin::constructSignatureBaseString(const QString &aUrl,
+     }
+ 
+     if (!inData.Callback().isEmpty()) {
+-        oAuthHeaderMap[OAUTH_CALLBACK] = inData.Callback();
++        oAuthHeaderMap[OAUTH_CALLBACK] = inData.Callback().compare(
++                DEFAULT_EXTERNAL_REDIRECT_URI, Qt::CaseInsensitive) == 0
++                        ? d->m_defaultExternalRedirectUrl
++                        : inData.Callback();
+     }
+     oAuthHeaderMap[OAUTH_CONSUMERKEY]  = inData.ConsumerKey();
+     oAuthHeaderMap[OAUTH_NONCE] = nonce;
+@@ -417,7 +439,10 @@ QString OAuth1Plugin::createOAuth1Header(const QString &aUrl,
+     }
+     if (!inData.Callback().isEmpty()) {
+         authHeader.append(EQUAL_WITH_QUOTES.arg(OAUTH_CALLBACK)
+-                          .arg(urlEncode(inData.Callback())));
++                          .arg(urlEncode(inData.Callback().compare(
++                               DEFAULT_EXTERNAL_REDIRECT_URI, Qt::CaseInsensitive) == 0
++                                       ? d->m_defaultExternalRedirectUrl
++                                       : inData.Callback())));
+         authHeader.append(DELIMITER);
+     }
+     authHeader.append(EQUAL_WITH_QUOTES.arg(OAUTH_CONSUMERKEY)
+diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
+index 28033ca..5b855d8 100644
+--- a/src/oauth2plugin.cpp
++++ b/src/oauth2plugin.cpp
+@@ -30,6 +30,9 @@
+ #include <QNetworkReply>
+ #include <QDateTime>
+ 
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
++
+ #define USE_LIBQJSON (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+ 
+ #if USE_LIBQJSON
+@@ -70,6 +73,8 @@ const QString CLIENT_SECRET = QString("client_secret");
+ const QString REFRESH_TOKEN = QString("refresh_token");
+ const QString AUTH_ERROR = QString("error");
+ 
++const QString DEFAULT_EXTERNAL_REDIRECT_URI = QString("org.sailfishos.accounts.default_external_redirect");
++
+ const QByteArray CONTENT_TYPE = QByteArray("Content-Type");
+ const QByteArray CONTENT_APP_URLENCODED = QByteArray("application/x-www-form-urlencoded");
+ const QByteArray CONTENT_APP_JSON = QByteArray("application/json");
+@@ -100,6 +105,7 @@ public:
+     QString m_username;
+     QString m_password;
+     GrantType::e m_grantType;
++    QString m_defaultExternalRedirectUrl;
+ }; //Private
+ 
+ } //namespace OAuth2PluginNS
+@@ -109,6 +115,13 @@ OAuth2Plugin::OAuth2Plugin(QObject *parent):
+     d_ptr(new OAuth2PluginPrivate())
+ {
+     TRACE();
++
++    QDBusInterface iface(QStringLiteral("net.connman"),
++                         QStringLiteral("/"),
++                         QStringLiteral("net.connman.Manager"),
++                         QDBusConnection::systemBus());
++    QDBusReply<QVariantMap> props = iface.call(QStringLiteral("GetProperties"));
++    d_ptr->m_defaultExternalRedirectUrl = props.value().value(QStringLiteral("Ipv4StatusUrl")).toString();
+ }
+ 
+ OAuth2Plugin::~OAuth2Plugin()
+@@ -130,9 +143,14 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
+ {
+     Q_D(OAuth2Plugin);
+ 
++    const QString redirectUri = d->m_oauth2Data.RedirectUri().compare(
++            DEFAULT_EXTERNAL_REDIRECT_URI, Qt::CaseInsensitive) == 0
++                ? d->m_defaultExternalRedirectUrl
++                : d->m_oauth2Data.RedirectUri();
++
+     QUrl url(QString("https://%1/%2").arg(d->m_oauth2Data.Host()).arg(d->m_oauth2Data.AuthPath()));
+     url.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
+-    url.addQueryItem(REDIRECT_URI, d->m_oauth2Data.RedirectUri());
++    url.addQueryItem(REDIRECT_URI, redirectUri);
+     if (!d->m_oauth2Data.ResponseType().isEmpty()) {
+         url.addQueryItem(RESPONSE_TYPE,
+                          d->m_oauth2Data.ResponseType().join(" "));
+@@ -162,8 +180,8 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
+     TRACE() << "Url = " << url.toString();
+     SignOn::UiSessionData uiSession;
+     uiSession.setOpenUrl(url.toString());
+-    if (!d->m_oauth2Data.RedirectUri().isEmpty())
+-        uiSession.setFinalUrl(d->m_oauth2Data.RedirectUri());
++    if (!redirectUri.isEmpty())
++        uiSession.setFinalUrl(redirectUri);
+ 
+     /* add username and password, for fields initialization (the
+      * decision on whether to actually use them is up to the signon UI */
+@@ -350,9 +368,12 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
+         return;
+     }
+ 
+-    const QString redirectUri = data.getProperty(QLatin1String("RedirectUri")).toString().isEmpty()
+-                              ? d->m_oauth2Data.RedirectUri()
+-                              : data.getProperty(QLatin1String("RedirectUri")).toString();
++    QString redirectUri = data.getProperty(QLatin1String("RedirectUri")).toString().isEmpty()
++                        ? d->m_oauth2Data.RedirectUri()
++                        : data.getProperty(QLatin1String("RedirectUri")).toString();
++    if (redirectUri.compare(DEFAULT_EXTERNAL_REDIRECT_URI, Qt::CaseInsensitive) == 0) {
++        redirectUri = d->m_defaultExternalRedirectUrl;
++    }
+ 
+     TRACE() << "OAuth2Plugin:userActionFinished: got:" << data.UrlResponse() << redirectUri;
+ 
+diff --git a/src/src.pro b/src/src.pro
+index 3360ce7..e172064 100644
+--- a/src/src.pro
++++ b/src/src.pro
+@@ -5,7 +5,8 @@ TARGET = oauth2plugin
+ DESTDIR = lib/signon
+ QT += core \
+     network \
+-    xmlpatterns
++    xmlpatterns \
++    dbus
+ QT -= gui
+ CONFIG += plugin \
+     build_all \
+diff --git a/tests/tests.pro b/tests/tests.pro
+index e49f5f3..204541e 100644
+--- a/tests/tests.pro
++++ b/tests/tests.pro
+@@ -3,6 +3,7 @@ include( ../common-vars.pri )
+ TARGET = signon-oauth2plugin-tests
+ QT += core \
+     network \
++    dbus \
+     testlib
+ QT -= gui
+ 
+-- 
+2.17.1
+

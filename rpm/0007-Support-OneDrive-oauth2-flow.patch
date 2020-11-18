@@ -1,7 +1,7 @@
-From 2ff03f869d420e03b484046365238695e73aaa72 Mon Sep 17 00:00:00 2001
+From 9815c09f98a426827217561ff524b403fb2603bf Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 2 Apr 2020 14:30:48 +1000
-Subject: [PATCH 7/7] Support OneDrive oauth2 flow
+Subject: [PATCH 7/8] Support OneDrive oauth2 flow
 
 OneDrive supports a slightly non-standard USER_AGENT flow where
 a bearer code may be exchanged for a token.

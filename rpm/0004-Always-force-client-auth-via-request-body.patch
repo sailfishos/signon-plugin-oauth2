@@ -1,7 +1,7 @@
-From f9fc28c60d7bad6de60cb4479beadbd2fe77672a Mon Sep 17 00:00:00 2001
+From d2fc7b6e07e9cee475e4fe90a1c7ba987c164af2 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 5 Feb 2015 20:34:01 +1000
-Subject: [PATCH 4/7] Always force client auth via request body
+Subject: [PATCH 4/8] Always force client auth via request body
 
 ---
  src/oauth2plugin.cpp | 18 +++++++++---------
