@@ -1,24 +1,23 @@
-From f9fc28c60d7bad6de60cb4479beadbd2fe77672a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 5 Feb 2015 20:34:01 +1000
-Subject: [PATCH 4/7] Always force client auth via request body
+Subject: [PATCH] Always force client auth via request body
 
 ---
- src/oauth2plugin.cpp | 18 +++++++++---------
- 1 file changed, 9 insertions(+), 9 deletions(-)
+ src/oauth2plugin.cpp | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
 
 diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
-index 290adf0..5775700 100644
+index be39263..3eb3fef 100644
 --- a/src/oauth2plugin.cpp
 +++ b/src/oauth2plugin.cpp
-@@ -602,17 +602,17 @@ void OAuth2Plugin::sendOAuth2PostRequest(QUrl &postData,
+@@ -708,17 +708,8 @@ void OAuth2Plugin::sendOAuth2PostRequest(QUrl &postData,
      request.setRawHeader(CONTENT_TYPE, CONTENT_APP_URLENCODED);
  
      if (!d->m_oauth2Data.ClientSecret().isEmpty()) {
 -        if (d->m_oauth2Data.ForceClientAuthViaRequestBody()) {
-+//        if (d->m_oauth2Data.ForceClientAuthViaRequestBody()) {
-             postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
-             postData.addQueryItem(CLIENT_SECRET, d->m_oauth2Data.ClientSecret());
+-            postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
+-            postData.addQueryItem(CLIENT_SECRET, d->m_oauth2Data.ClientSecret());
 -        } else {
 -            QByteArray authorization =
 -                QUrl::toPercentEncoding(d->m_oauth2Data.ClientId()) + ":" +
@@ -27,17 +26,11 @@ index 290adf0..5775700 100644
 -                QByteArray("Basic ") + authorization.toBase64();
 -            request.setRawHeader("Authorization", basicAuthorization);
 -        }
-+//        } else {
-+//            QByteArray authorization =
-+//                QUrl::toPercentEncoding(d->m_oauth2Data.ClientId()) + ":" +
-+//                QUrl::toPercentEncoding(d->m_oauth2Data.ClientSecret());
-+//            QByteArray basicAuthorization =
-+//                QByteArray("Basic ") + authorization.toBase64();
-+//            request.setRawHeader("Authorization", basicAuthorization);
-+//        }
++        postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
++        postData.addQueryItem(CLIENT_SECRET, d->m_oauth2Data.ClientSecret());
      } else {
          postData.addQueryItem(CLIENT_ID, d->m_oauth2Data.ClientId());
      }
 -- 
-2.17.1
+2.37.2
 

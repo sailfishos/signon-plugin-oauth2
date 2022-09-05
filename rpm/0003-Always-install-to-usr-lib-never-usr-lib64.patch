@@ -1,32 +1,29 @@
-From 6535ae8eab06369f9122061b200c8f9deefff4d8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Chris Adams <chris.adams@jollamobile.com>
 Date: Thu, 5 Feb 2015 20:32:52 +1000
-Subject: [PATCH 3/7] Always install to /usr/lib never /usr/lib64
+Subject: [PATCH] Always install to /usr/lib never /usr/lib64
 
 ---
- common-project-config.pri | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ common-project-config.pri | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
 diff --git a/common-project-config.pri b/common-project-config.pri
-index 8385ad4..d13f590 100644
+index e149d90..68f82de 100644
 --- a/common-project-config.pri
 +++ b/common-project-config.pri
-@@ -48,11 +48,11 @@ exists( meego-release ) {
+@@ -50,11 +50,7 @@ exists( meego-release ) {
      ARCH = $$system(uname -m)
  }
  
 -contains( ARCH, x86_64 ) {
 -    INSTALL_LIBDIR = $${INSTALL_PREFIX}/lib64
 -} else {
-+#contains( ARCH, x86_64 ) {
-+#    INSTALL_LIBDIR = $${INSTALL_PREFIX}/lib64
-+#} else {
-     INSTALL_LIBDIR = $${INSTALL_PREFIX}/lib
+-    INSTALL_LIBDIR = $${INSTALL_PREFIX}/lib
 -}
-+#}
++INSTALL_LIBDIR = $${INSTALL_PREFIX}/lib
  
  # default library directory can be overriden by defining LIBDIR when
  # running qmake
 -- 
-2.17.1
+2.37.2
 
