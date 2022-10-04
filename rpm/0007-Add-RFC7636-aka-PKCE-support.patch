@@ -1,0 +1,133 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tomi=20Lepp=C3=A4nen?= <tomi.leppanen@jolla.com>
+Date: Tue, 4 Oct 2022 14:58:30 +0300
+Subject: [PATCH] Add RFC7636 (aka PKCE) support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This implements "pixie". It is enabled by default as there should be
+very little harm if the server does not support it. However, if the
+service is broken and may not receive code_challenge, then there is
+SkipPKCE property that can be set to true.
+
+There is no support for "plain" method as the specification requires
+that implementations use "S256" when the device can handle sha256.
+Server must always support it anyway.
+
+Code challenge is generated just like the specification recommends,
+constructing 32-octet sequence that is then base64url encoded. This uses
+/dev/urandom to get randomness for code verifier which works well on
+Linux but might behave differently on other platforms and is not
+portable to non Unix-like OSs.
+
+Signed-off-by: Tomi Leppänen <tomi.leppanen@jolla.com>
+---
+ src/oauth2data.h     | 10 ++++++++++
+ src/oauth2plugin.cpp | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+
+diff --git a/src/oauth2data.h b/src/oauth2data.h
+index 31184974f2cd25be7df5483415496a13f9df2cf0..7b4623b21a6678f7d32b4d4b1e8915191a058c29 100644
+--- a/src/oauth2data.h
++++ b/src/oauth2data.h
+@@ -125,6 +125,16 @@ namespace OAuth2PluginNS {
+          */
+         SIGNON_SESSION_DECLARE_PROPERTY(QString, TokenQuery);
+ 
++        /*!
++         * set to true to skip PKCE (RFC7636)
++         */
++        SIGNON_SESSION_DECLARE_PROPERTY(bool, SkipPKCE);
++
++        /*!
++         * code verifier for PKCE (RFC7636)
++         */
++        SIGNON_SESSION_DECLARE_PROPERTY(QByteArray, CodeVerifier);
++
+         /*!
+          * Any extra (non standard) parameters to send to the endpoint URI
+          */
+diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
+index a5f8e9769939ad1e0fe04840ef9208365167369b..452d03a88e927a26a5860a572efe98ef072486ec 100644
+--- a/src/oauth2plugin.cpp
++++ b/src/oauth2plugin.cpp
+@@ -25,6 +25,8 @@
+ #include "oauth2plugin.h"
+ #include "oauth2tokendata.h"
+ 
++#include <QCryptographicHash>
++#include <QFile>
+ #include <QJsonDocument>
+ #include <QUrl>
+ #include <QUrlQuery>
+@@ -68,6 +70,9 @@ const QString CLIENT_ID = QString("client_id");
+ const QString CLIENT_SECRET = QString("client_secret");
+ const QString REFRESH_TOKEN = QString("refresh_token");
+ const QString AUTH_ERROR = QString("error");
++const QString CODE_CHALLENGE = QString("code_challenge");
++const QString CODE_CHALLENGE_METHOD = QString("code_challenge_method");
++const QString CODE_VERIFIER = QString("code_verifier");
+ 
+ const QByteArray CONTENT_TYPE = QByteArray("Content-Type");
+ const QByteArray CONTENT_APP_URLENCODED = QByteArray("application/x-www-form-urlencoded");
+@@ -75,6 +80,33 @@ const QByteArray CONTENT_APP_JSON = QByteArray("application/json");
+ const QByteArray CONTENT_TEXT_PLAIN = QByteArray("text/plain");
+ const QByteArray CONTENT_TEXT_HTML = QByteArray("text/html");
+ 
++namespace {
++
++QByteArray getRandomCodeVerifier()
++{
++    /* Random code verifier generation as PKCE (RFC7636) defines it */
++    QByteArray data;
++    QFile urandom("/dev/urandom");
++    if (urandom.open(QIODevice::ReadOnly))
++        data = urandom.read(32);
++    if (data.isEmpty()) {
++        TRACE() << "Failed to read" << urandom.fileName() << "to construct code verifier";
++    } else if (data.size() < 32) {
++        TRACE() << "Code verifier length" << data.size() << "is shorter than 32 bytes";
++    }
++    return data.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
++}
++
++QByteArray getCodeChallenge(const QByteArray &codeVerifier)
++{
++    /* Code challenge generation as PKCE (RFC7636) defines it.
++     * Only S256 method is supported as required by the specification when
++     * device can support it. */
++    return QCryptographicHash::hash(codeVerifier, QCryptographicHash::Sha256)
++        .toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
++}
++
++} // namespace
+ 
+ class OAuth2PluginPrivate
+ {
+@@ -191,6 +223,14 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
+         // Passing list of scopes
+         url.addQueryItem(SCOPE, QUrl::toPercentEncoding(scopes.join(" ")));
+     }
++    // PKCE (RFC7636)
++    if (!d->m_oauth2Data.SkipPKCE()) {
++        QByteArray codeVerifier = getRandomCodeVerifier();
++        d->m_oauth2Data.setCodeVerifier(codeVerifier);
++        QByteArray codeChallenge = getCodeChallenge(codeVerifier);
++        url.addQueryItem(CODE_CHALLENGE, QString::fromUtf8(codeChallenge));
++        url.addQueryItem(CODE_CHALLENGE_METHOD, "S256");
++    }
+     /* If there are extra parameters provided, apply those to the request.
+      * This allows to instruct the website to require login for example. */
+     QVariantMap extraParams = d->m_oauth2Data.ExtraParams();
+@@ -499,6 +539,10 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
+             newUrl.addQueryItem(GRANT_TYPE, AUTHORIZATION_CODE);
+             newUrl.addQueryItem(AUTH_CODE, code);
+             newUrl.addQueryItem(REDIRECT_URI, redirectUri);
++            // PKCE (RFC7636)
++            QByteArray codeVerifier = d->m_oauth2Data.CodeVerifier();
++            if (!codeVerifier.isEmpty())
++                newUrl.addQueryItem(CODE_VERIFIER, QString::fromUtf8(codeVerifier));
+             TRACE() << "WEB_SERVER flow got auth code query item, sending auth code request:" << newUrl.toString();
+             sendOAuth2PostRequest(newUrl,
+                                   GrantType::AuthorizationCode);
