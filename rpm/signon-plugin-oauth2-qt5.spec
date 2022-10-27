@@ -10,6 +10,8 @@ Patch1: 0002-OAuth2-Relax-RefreshToken-restriction-on-ProvidedTok.patch
 Patch2: 0003-Always-install-to-usr-lib-never-usr-lib64.patch
 Patch3: 0004-Always-force-client-auth-via-request-body.patch
 Patch4: 0005-Support-Microsoft-OAuth2-flow.patch
+Patch5: 0006-Add-ExtraParams-to-plugin-data.patch
+Patch6: 0007-Add-RFC7636-aka-PKCE-support.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(Qt5Network)
