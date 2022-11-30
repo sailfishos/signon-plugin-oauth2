@@ -8,7 +8,7 @@ Subject: [PATCH] Always install to /usr/lib never /usr/lib64
  1 file changed, 1 insertion(+), 5 deletions(-)
 
 diff --git a/common-project-config.pri b/common-project-config.pri
-index e149d90..68f82de 100644
+index e149d90158618cddae8694c56ee9df32e32bbd27..68f82de5aca9b79b1ba8b7239a8771143bed429c 100644
 --- a/common-project-config.pri
 +++ b/common-project-config.pri
 @@ -50,11 +50,7 @@ exists( meego-release ) {
@@ -24,6 +24,3 @@ index e149d90..68f82de 100644
  
  # default library directory can be overriden by defining LIBDIR when
  # running qmake
--- 
-2.37.2
-

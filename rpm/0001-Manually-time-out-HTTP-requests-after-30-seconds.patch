@@ -12,7 +12,7 @@ manually after 30 seconds.
  2 files changed, 19 insertions(+)
 
 diff --git a/src/base-plugin.cpp b/src/base-plugin.cpp
-index aa2d639..60a7958 100644
+index aa2d639e78f14a87e266a4d58d272a203ba1ed6a..60a7958e207d619421e54c5ccef2c226c700df4d 100644
 --- a/src/base-plugin.cpp
 +++ b/src/base-plugin.cpp
 @@ -32,6 +32,7 @@
@@ -83,7 +83,7 @@ index aa2d639..60a7958 100644
  {
      Q_D(BasePlugin);
 diff --git a/src/base-plugin.h b/src/base-plugin.h
-index 9a72718..d5de1a8 100644
+index 9a727184f14e18d0aa1f51ff7d09561bb43763fe..d5de1a81b6dfd4be1b1da2cf56bd2663964c64e9 100644
 --- a/src/base-plugin.h
 +++ b/src/base-plugin.h
 @@ -74,6 +74,7 @@ protected:
@@ -94,6 +94,3 @@ index 9a72718..d5de1a8 100644
      void onNetworkError(QNetworkReply::NetworkError err);
      virtual void handleSslErrors(QList<QSslError> errorList);
  
--- 
-2.37.2
-

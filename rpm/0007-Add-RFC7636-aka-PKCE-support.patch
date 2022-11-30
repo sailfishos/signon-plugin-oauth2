@@ -6,8 +6,8 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-This implements "pixie". It is enabled by default as there should be
-very little harm if the server does not support it. However, if the
+This implements "pixie". It is enabled if the server if the server
+asks for a response type "code". However, if the
 service is broken and may not receive code_challenge, then there is
 SkipPKCE property that can be set to true.
 
@@ -22,6 +22,7 @@ Linux but might behave differently on other platforms and is not
 portable to non Unix-like OSs.
 
 Signed-off-by: Tomi Leppänen <tomi.leppanen@jolla.com>
+Signed-off-by: Björn Bidar <bjorn.bidar@jolla.com>
 ---
  src/oauth2data.h     | 10 ++++++++++
  src/oauth2plugin.cpp | 44 ++++++++++++++++++++++++++++++++++++++++++++
@@ -49,7 +50,7 @@ index 31184974f2cd25be7df5483415496a13f9df2cf0..7b4623b21a6678f7d32b4d4b1e891519
           * Any extra (non standard) parameters to send to the endpoint URI
           */
 diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
-index a5f8e9769939ad1e0fe04840ef9208365167369b..452d03a88e927a26a5860a572efe98ef072486ec 100644
+index 561c222bccbc938f2ee878a5e7bea25c13ea06da..0f0f0793947f276ad629933edba4139dcc66cba7 100644
 --- a/src/oauth2plugin.cpp
 +++ b/src/oauth2plugin.cpp
 @@ -25,6 +25,8 @@
@@ -110,7 +111,7 @@ index a5f8e9769939ad1e0fe04840ef9208365167369b..452d03a88e927a26a5860a572efe98ef
          url.addQueryItem(SCOPE, QUrl::toPercentEncoding(scopes.join(" ")));
      }
 +    // PKCE (RFC7636)
-+    if (!d->m_oauth2Data.SkipPKCE()) {
++    if (!d->m_oauth2Data.SkipPKCE() && responseType.contains("code")) {
 +        QByteArray codeVerifier = getRandomCodeVerifier();
 +        d->m_oauth2Data.setCodeVerifier(codeVerifier);
 +        QByteArray codeChallenge = getCodeChallenge(codeVerifier);
@@ -120,7 +121,7 @@ index a5f8e9769939ad1e0fe04840ef9208365167369b..452d03a88e927a26a5860a572efe98ef
      /* If there are extra parameters provided, apply those to the request.
       * This allows to instruct the website to require login for example. */
      QVariantMap extraParams = d->m_oauth2Data.ExtraParams();
-@@ -499,6 +539,10 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
+@@ -501,6 +541,10 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
              newUrl.addQueryItem(GRANT_TYPE, AUTHORIZATION_CODE);
              newUrl.addQueryItem(AUTH_CODE, code);
              newUrl.addQueryItem(REDIRECT_URI, redirectUri);
