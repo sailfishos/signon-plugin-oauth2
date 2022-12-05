@@ -12,18 +12,19 @@ to select account.
 
 Signed-off-by: Tomi Leppänen <tomi.leppanen@jolla.com>
 ---
- src/oauth2data.h     | 4 ++++
+ src/oauth2data.h     | 5 +++++
  src/oauth2plugin.cpp | 8 ++++++++
- 2 files changed, 12 insertions(+)
+ 2 files changed, 13 insertions(+)
 
 diff --git a/src/oauth2data.h b/src/oauth2data.h
-index da154f643552dad6ac425ed26ed3c3afebde23d2..dacd3d499cd19ff9345e1e3161bdd8d08a80a82d 100644
+index da154f643552dad6ac425ed26ed3c3afebde23d2..31184974f2cd25be7df5483415496a13f9df2cf0 100644
 --- a/src/oauth2data.h
 +++ b/src/oauth2data.h
-@@ -124,6 +124,10 @@ namespace OAuth2PluginNS {
+@@ -124,6 +124,11 @@ namespace OAuth2PluginNS {
           * query component of the token endpoint URI
           */
          SIGNON_SESSION_DECLARE_PROPERTY(QString, TokenQuery);
++
 +        /*!
 +         * Any extra (non standard) parameters to send to the endpoint URI
 +         */
