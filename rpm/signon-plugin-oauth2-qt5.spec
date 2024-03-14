@@ -16,18 +16,12 @@ Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(Qt5Network)
 BuildRequires: pkgconfig(Qt5Core)
-BuildRequires: pkgconfig(Qt5XmlPatterns)
 BuildRequires: pkgconfig(Qt5Test)
 BuildRequires: pkgconfig(signond)
 
 
 %description
 %{summary}.
-
-%files
-%defattr(-,root,root,-)
-%{_libdir}/signon/liboauth2plugin.so
-%license COPYING
 
 %prep
 %autosetup -p1 -n %{name}-%{version}/signon-plugin-oauth2
@@ -38,35 +32,17 @@ Summary: OAuth2 SignOn Plugin OAuth Client
 %description oauthclient
 %{summary}.
 
-%files oauthclient
-%defattr(-,root,root,-)
-%{_bindir}/oauthclient
-%{_sysconfdir}/signon-ui/webkit-options.d/m.facebook.com.conf
-%{_sysconfdir}/signon-ui/webkit-options.d/www.facebook.com.conf
-
-
 %package devel
 Summary: Tests for the oauth2 signon plugin
 
 %description devel
 %{summary}.
 
-%files devel
-%{_includedir}/signon-plugins/oauth1data.h
-%{_includedir}/signon-plugins/oauth2data.h
-%{_libdir}/pkgconfig/signon-oauth2plugin.pc
-
-
 %package tests
 Summary: Tests for the oauth2 signon plugin
 
 %description tests
 %{summary}.
-
-%files tests
-%{_bindir}/signon-oauth2plugin-tests
-%{_datadir}/signon-oauth2plugin-tests/tests.xml
-
 
 %build
 %qmake5 CONFIG+=make_examples
@@ -77,3 +53,21 @@ make %{?_smp_mflags}
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
+
+%files
+%{_libdir}/signon/liboauth2plugin.so
+%license COPYING
+
+%files oauthclient
+%{_bindir}/oauthclient
+%{_sysconfdir}/signon-ui/webkit-options.d/m.facebook.com.conf
+%{_sysconfdir}/signon-ui/webkit-options.d/www.facebook.com.conf
+
+%files devel
+%{_includedir}/signon-plugins/oauth1data.h
+%{_includedir}/signon-plugins/oauth2data.h
+%{_libdir}/pkgconfig/signon-oauth2plugin.pc
+
+%files tests
+%{_bindir}/signon-oauth2plugin-tests
+%{_datadir}/signon-oauth2plugin-tests/tests.xml
