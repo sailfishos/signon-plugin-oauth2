@@ -25,11 +25,11 @@ Signed-off-by: Tomi Leppänen <tomi.leppanen@jolla.com>
 Signed-off-by: Björn Bidar <bjorn.bidar@jolla.com>
 ---
  src/oauth2data.h     | 10 ++++++++++
- src/oauth2plugin.cpp | 44 ++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 54 insertions(+)
+ src/oauth2plugin.cpp | 45 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 55 insertions(+)
 
 diff --git a/src/oauth2data.h b/src/oauth2data.h
-index 31184974f2cd25be7df5483415496a13f9df2cf0..7b4623b21a6678f7d32b4d4b1e8915191a058c29 100644
+index 3118497..7b4623b 100644
 --- a/src/oauth2data.h
 +++ b/src/oauth2data.h
 @@ -125,6 +125,16 @@ namespace OAuth2PluginNS {
@@ -50,7 +50,7 @@ index 31184974f2cd25be7df5483415496a13f9df2cf0..7b4623b21a6678f7d32b4d4b1e891519
           * Any extra (non standard) parameters to send to the endpoint URI
           */
 diff --git a/src/oauth2plugin.cpp b/src/oauth2plugin.cpp
-index 561c222bccbc938f2ee878a5e7bea25c13ea06da..0f0f0793947f276ad629933edba4139dcc66cba7 100644
+index ab55925..d772311 100644
 --- a/src/oauth2plugin.cpp
 +++ b/src/oauth2plugin.cpp
 @@ -25,6 +25,8 @@
@@ -106,29 +106,30 @@ index 561c222bccbc938f2ee878a5e7bea25c13ea06da..0f0f0793947f276ad629933edba4139d
  
  class OAuth2PluginPrivate
  {
-@@ -191,6 +223,14 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
-         // Passing list of scopes
-         url.addQueryItem(SCOPE, QUrl::toPercentEncoding(scopes.join(" ")));
+@@ -193,6 +225,15 @@ void OAuth2Plugin::sendOAuth2AuthRequest()
+         query.addQueryItem(SCOPE, QUrl::toPercentEncoding(scopes.join(" ")));
      }
+ 
 +    // PKCE (RFC7636)
 +    if (!d->m_oauth2Data.SkipPKCE() && responseType.contains("code")) {
 +        QByteArray codeVerifier = getRandomCodeVerifier();
 +        d->m_oauth2Data.setCodeVerifier(codeVerifier);
 +        QByteArray codeChallenge = getCodeChallenge(codeVerifier);
-+        url.addQueryItem(CODE_CHALLENGE, QString::fromUtf8(codeChallenge));
-+        url.addQueryItem(CODE_CHALLENGE_METHOD, "S256");
++        query.addQueryItem(CODE_CHALLENGE, QString::fromUtf8(codeChallenge));
++        query.addQueryItem(CODE_CHALLENGE_METHOD, "S256");
 +    }
++
      /* If there are extra parameters provided, apply those to the request.
       * This allows to instruct the website to require login for example. */
      QVariantMap extraParams = d->m_oauth2Data.ExtraParams();
-@@ -501,6 +541,10 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
-             newUrl.addQueryItem(GRANT_TYPE, AUTHORIZATION_CODE);
-             newUrl.addQueryItem(AUTH_CODE, code);
-             newUrl.addQueryItem(REDIRECT_URI, redirectUri);
+@@ -502,6 +543,10 @@ void OAuth2Plugin::userActionFinished(const SignOn::UiSessionData &data)
+             tokenQuery.addQueryItem(GRANT_TYPE, AUTHORIZATION_CODE);
+             tokenQuery.addQueryItem(AUTH_CODE, code);
+             tokenQuery.addQueryItem(REDIRECT_URI, redirectUri);
 +            // PKCE (RFC7636)
 +            QByteArray codeVerifier = d->m_oauth2Data.CodeVerifier();
 +            if (!codeVerifier.isEmpty())
-+                newUrl.addQueryItem(CODE_VERIFIER, QString::fromUtf8(codeVerifier));
-             TRACE() << "WEB_SERVER flow got auth code query item, sending auth code request:" << newUrl.toString();
-             sendOAuth2PostRequest(newUrl,
++                tokenQuery.addQueryItem(CODE_VERIFIER, QString::fromUtf8(codeVerifier));
+             TRACE() << "WEB_SERVER flow got auth code query item, sending auth code request:" << tokenQuery.toString();
+             sendOAuth2PostRequest(tokenQuery,
                                    GrantType::AuthorizationCode);
