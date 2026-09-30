@@ -12,6 +12,7 @@ Patch3: 0004-Always-force-client-auth-via-request-body.patch
 Patch4: 0005-Support-Microsoft-OAuth2-flow.patch
 Patch5: 0006-Add-ExtraParams-to-plugin-data.patch
 Patch6: 0007-Add-RFC7636-aka-PKCE-support.patch
+Patch7: 0008-Use-toMSecSinceEpoch.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires: pkgconfig(Qt5Network)
@@ -46,7 +47,7 @@ Summary: Tests for the oauth2 signon plugin
 
 %build
 %qmake5 CONFIG+=make_examples
-make %{?_smp_mflags}
+%make_build
 
 %install
 %qmake5_install
